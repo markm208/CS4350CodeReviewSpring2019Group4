@@ -37,16 +37,60 @@ void convertToCmnDenom(int& n1, int& d1, int& n2, int& d2){
     d2 = d1;    //together
 }
 
-void characteristicToResult(int characteristic, char*& result, int len){
+char* intToCstr(int characteristic, int numerator, int denominator, char* result, int len) {
+	int i = 0;
+	bool isNegative = false;
 
-    int powerOfCharacteristic = 10;
-    for(int i = 0; i < len; i++){
-        powerOfCharacteristic *= 10;
-    }
-    int num = 0;
+	if (characteristic == 0)	//checks to see if the characteristic is just 0
+	{
+		result[i] = '0';
+		i++;
+		result[i] = '.';
+		i++;
+		result[i] = '\0';
+		return result;
+	}
 
-    for(int i = 10; i < powerOfCharacteristic; i *= 10){
-        
-    }
+	result[i] = '.';	//insert the decimal
+	i++;
 
+	if (characteristic < 0) //if the characteristic is negative
+	{
+		isNegative = true;
+		characteristic = -characteristic;
+	}
+
+	while (characteristic != 0)
+	{
+		int remainder = characteristic % 10;	//find the remainder
+
+		if (remainder > 9) {
+			result[i] = (remainder - 10) + 'a';
+		}
+		else {	//if the remainder is lower than 9, it is added to the array
+			result[i] = remainder + '0';	//using the ascii value
+		}
+
+		i++;
+		characteristic = characteristic / 10;	//divide the characteristic by 10
+	}
+
+	if (isNegative) {
+		result[i] = '-';	// if the characteristic is negative
+		i++;	//append a - onto the end and increment i
+	}
+
+
+	result[i] = '\0'; // Append string terminator 
+
+	cout << result << endl;
+
+	//now reverse the string
+	result = reverseCstr(result, i);
+
+	for (int decimalPlace = i; decimalPlace < len; decimalPlace++) {
+		result[decimalPlace] = (numerator % denominator) + '0';
+	}
+
+	return result;
 }
