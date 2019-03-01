@@ -16,5 +16,9 @@ bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 }
 
 void convertToCmnDenom(int& n1, int& d1, int& n2, int& d2){
-
+    n1 *= d2;   //multiply the numerators
+    n2 *= d1;   //by the other fraction's denominator
+    
+    d1 *= d2;   //multiply the denominators
+    d2 = d1;    //together
 }
