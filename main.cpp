@@ -9,8 +9,8 @@ int main(int args, char *argv[])
 {
 	// driver for the program
 	int c = 0;
-	char numberToTest[] = "-43.25";
-	cout << characteristic(numberToTest, c) << endl;
+	char numberToTest[] = "-443.25";
+	cout << "Returned: " << characteristic(numberToTest, c) << endl;
 	cout << c << endl;
 
 	return 0;
@@ -24,58 +24,84 @@ bool characteristic(char numString[], int &c)
 	// because we are also looping through the array to remove spaces, we may as well store the size
 	// of the array for ease of use later
 
-	int arraySize = 0;
+	int sizeWithoutSpaces = 0;
 	int iterator = 0;
 
-	while (numString[iterator] != '\0')
+    // before we mess with any pointers, we're going to want to assign a value to c by sending over the numString to our atoi() function
+    c = atoi(numString);
+
+    // when we iterate through the char[], we won't want to use the actual numString because that will change the pointer to point to
+    // the end of the char[]
+
+    char * head = numString;
+
+	while (head[iterator] != '\0')
 	{
-		if (numString[iterator] != ' ')
+		if (head[iterator] != ' ')
 		{
-			arraySize++;
+			sizeWithoutSpaces++;
 		}
 		iterator++;
 	}
-	// add the null terminator to the arraySize
-	arraySize++;
 
 	// iterate through the array and store all digit characters in a new array;
 	// digitArray will store the values of all of the digits that we find from the numString[]
-	char * digitArray = new char[arraySize];
+	char * iterate = new char[sizeWithoutSpaces];
+    char * digitArray = iterate;
 
+    // reset head * location to the beginning of numString to use as iterator
+    head = numString;
+
+    // here we have two iterators, one to keep track of the iteration through numString (iterator2)
+    // and the other add to the correct index of digitArray (digitArrayInc)
 	int iterator2 = 0;
+    int digitArrayInc = 0;
 
-	while (numString[iterator2] != '\0')
+	while (head[iterator2] != '\0')
 	{
-		if (numString[iterator2] != ' ')
+		if (head[iterator2] != ' ')
 		{
 			// if the iterator has reached a digit in the string, we can use the tail array to jump to the digit so it can only store digits.
-			*digitArray = numString[iterator2];
-			// increment both the digitArray pointer and the iterator so that it is pointing to the next spot in the char[];
-			digitArray++;
+			digitArray[digitArrayInc] = head[iterator2];
+			// increment both the char[] pointer and the iterator in order to loop through the entire cstring
+            digitArrayInc++;
 			iterator2++;
 		}
 		else
 		{
-			// the char is not important so we just increment
+			// the char is not important so we just increment the iterator
 			iterator2++;
 		}
 	}
-	// now we should add a null terminator to our digitArray;
-	//*digitArray = '\0';
 
 	// currently, our digitArray holds the number without spaces, so we should check to see if it is a valid number.
 
 	// we can loop through the array to check the values and determine if it is valid or not
 
 	int iterator3 = 0;
+    bool unary = false;
 	while (digitArray[iterator3] != '\0')
 	{
+        // check the first char and see if it is a unary symbol, it is only allowed as the first char
+        if (digitArray[0] == '+' || digitArray[0] == '-' && unary == false)
+        {
+            // switch the value of the bool to true so we will never step into here again
+            // by switching the bool, it acts as a flag by saying a unary symbol was provided as the first char
+            // but don't let it occur anymore
+            unary = true;
+            iterator3++;
+            continue;
+        }
 		if (digitArray[iterator3] == '.')
 		{
+            // if we find a decimal value before any bad input, then we know it is a valid characteristic
 			return true;
 		}
 		else if (digitArray[iterator3] < '0' || digitArray[iterator3] > '9')
 		{
+            // if we do not have any digit values at this point, then we know it is not a valid characteristic
+            // set c to 0 as a default
+            c = 0;
 			return false;
 		}
 		// else just increment the iterator to loop through char[]
@@ -83,7 +109,6 @@ bool characteristic(char numString[], int &c)
 	}
 
 	// if we haven't return false by this point, then the value is a good input, and we can change the value of c to our atoi function return
-	c = atoi(numString);
 	return true;
 
 }
@@ -92,7 +117,6 @@ int atoi(char * string)
 {
 	int result = 0;
 	int sign = 1;
-	int decimal = '.';
 	int i = 0;
 
 	// loop through the string until it isn't null
@@ -104,20 +128,28 @@ int atoi(char * string)
 			sign = -1;
 			i++;
 		}
+        // make sure that if the first char is a '+' that we ignore it, but make sure it's only the first
+        if (string[i] == '+')
+        {
+            //skip over
+            i++;
+        }
 		// if the string finds a decimal point, cut it off and return what it has so far stored in the result.
-		if (string[i] == decimal)
+		if (string[i] == '.')
 		{
 			break;
 		}
-		// to handle blank space
+        // to handle blank space
 		if (string[i] == ' ')
 		{
 			// skip over the char
 			i++;
+            continue;
 		}
-		if (string[i] > '9' || string[i] < '0')
+		else if (string[i] > '9' || string[i] < '0')
 		{
 			// not a digit so return 0;
+            cout << "Char:" << string[i] << "h" << endl;
 			return 0;
 		}
 
