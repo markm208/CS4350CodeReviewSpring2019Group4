@@ -89,11 +89,16 @@ bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
 	//set up the result string with all 0s and a /0 so we know when we reach the end. make sure our result has enough space for len chars
 	if (sizeof(result) < len)
 	{
-		result[len - 1] = (char) '/0';
+		result[len - 1] = '\0';
 	}
 	else
 	{
 		return false;
+	}
+
+	for (int index = 0; index < len - 1; index++)
+	{
+		result[index] = '0';
 	}
 
 	//see if the length of completeChar is longer than len - 1. fail if so
@@ -103,21 +108,66 @@ bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
 		return false;
 	}
 
+	//if characteristic is negative, input a '-', negate the char, and move the start position over by one
+	int startPos = 0;
+	if (completeChar < 0)
+	{
+		result[0] = '-';
+		completeChar *= -1;
+		startPos++;
+	}
+
 	//input the characteristic
 	int place = 10;
-	for (int index = compCharLen - 1; index >= 0; index--, place *= 10)
+	for (int index = compCharLen - 1 + startPos; index >= 0; index--, place *= 10)
 	{
-		result[index] = 48 + (completeChar % place);
+		result[index] = '0' + (completeChar % place) / (place / 10);
 	}
 
 	//input a decimal
 	result[compCharLen] = '.';
 
-	//convert the remaining fraction into a decimal to however many places we have left
-	//???
+	//now we work on the decimal. start with a iterator through the cstr just after the '.'
+	int indexInResult = compCharLen + 1;
 
-	//put the decimals into result
-	//???
+	/* prep for the long division. currentDividend is whatever we're working on dividing to get
+	the next digit. productsOfDivisor is the multiples of the denom, since whatever the index of
+	the largest one without going over currentDividend is the next digit */
+	int currentDividend = numerProd234;
+	int productsOfDivisor[10] = { 0 };
+	for (int index = 0; index < 10; index++)
+	{
+		productsOfDivisor[index] = index * denomProd234;
+	}
+
+	//while we haven't reached the end of the result cstr
+	while (result[indexInResult] != '\0')
+	{
+		//if there is no multiple of the divisor that fits in the dividend, bring down a 0 (multiply by 10)
+		if (productsOfDivisor[1] > currentDividend)
+		{
+			currentDividend *= 10;
+		}
+
+		//find the index of the greatest multiple that doesn't go over
+		int nextDigit;
+		for (nextDigit = 0; nextDigit < 10; nextDigit++)
+		{
+			//if we go over
+			if (productsOfDivisor[nextDigit] > currentDividend)
+			{
+				//we want one less than what we're currently at
+				nextDigit--;
+				break;
+			}
+		}
+
+		//set the current place in the result to nextDigit
+		result[indexInResult] = '0' + nextDigit;
+
+		//move to the next char in result
+		indexInResult++;
+	}
 
 	return true;
 }
@@ -200,6 +250,54 @@ int main()
 	n1 = 0;
 	d1 = 10;
 	c2 = 12;
+	n2 = 0;
+	d2 = 10;
+	if (multiply(c1, n1, d1, c2, n2, d2, result, len))
+	{
+		cout << "Valid inputs. Result is: " << result << endl;
+	}
+	else
+	{
+		cout << "Invalid inputs" << endl;
+	}
+
+	//attempt 14 0/10 * 12 0/10
+	c1 = 14;
+	n1 = 0;
+	d1 = 10;
+	c2 = 12;
+	n2 = 0;
+	d2 = 10;
+	if (multiply(c1, n1, d1, c2, n2, d2, result, len))
+	{
+		cout << "Valid inputs. Result is: " << result << endl;
+	}
+	else
+	{
+		cout << "Invalid inputs" << endl;
+	}
+
+	//attempt 14 3/10 * 12 7/10
+	c1 = 14;
+	n1 = 3;
+	d1 = 10;
+	c2 = 12;
+	n2 = 7;
+	d2 = 10;
+	if (multiply(c1, n1, d1, c2, n2, d2, result, len))
+	{
+		cout << "Valid inputs. Result is: " << result << endl;
+	}
+	else
+	{
+		cout << "Invalid inputs" << endl;
+	}
+
+	//attempt -3 0/10 * 2 0/10
+	c1 = -3;
+	n1 = 0;
+	d1 = 10;
+	c2 = 2;
 	n2 = 0;
 	d2 = 10;
 	if (multiply(c1, n1, d1, c2, n2, d2, result, len))
