@@ -47,13 +47,12 @@ char* intToCstr(int characteristic, int numerator, int denominator, char* result
 	int i = 0;
 	bool isNegative = false;
 
-	if (characteristic == 0)	//checks to see if the characteristic is just 0
+	if (characteristic == 0 && numerator == 0)	//checks to see if the number is just 0
 	{
-		result[i] = '0';
-		i++;
-		result[i] = '.';
-		i++;
-		result[i] = '\0';
+		result[0] = '0';
+		result[1] = '.';
+        result[2] = '0';
+		result[3] = '\0';
 		return result;
 	}
 
