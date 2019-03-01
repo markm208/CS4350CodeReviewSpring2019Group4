@@ -2,8 +2,10 @@
 
 using namespace std;
 
+bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len);
 void convertToCmnDenom(int& n1, int& d1, int& n2, int& d2);
-void characteristicToResult(int characteristic, char*& result, int len);
+char* intToCstr(int characteristic, int numerator, int denominator, char* result, int len);
+char* reverseCstr(char* str, int length);
 
 int main()
 {
@@ -25,7 +27,7 @@ bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
     cSum += nSum/d1; //add any overflow from the fraction
     nSum -= (nSum/d1)*d1; //subtract that overflow from the fraction
 
-    characteristicToResult(cSum, result, len);
+    result = intToCstr(cSum, nSum, d1, result, len);
 
 }
 
