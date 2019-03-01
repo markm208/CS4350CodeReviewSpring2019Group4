@@ -94,3 +94,15 @@ char* intToCstr(int characteristic, int numerator, int denominator, char* result
 
 	return result;
 }
+
+char* reverseCstr(char* str, int length) {
+	int i = 0;
+	int end = length - 1;
+	while (i < end) {
+		swap(*(str + i), *(str + end));
+		i++;
+		end--;
+	}
+
+	return str;
+}
