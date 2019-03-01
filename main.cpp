@@ -9,10 +9,6 @@ char* reverseCstr(char* str, int length);
 
 int main()
 {
-
-    char sum[5];
-    add(1,1,3,2,7,8,sum,5);
-    cout<<"This is the sum: "<<sum<<endl;
     return 0;
 }
 
@@ -29,6 +25,13 @@ bool add(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
 
     result = intToCstr(cSum, nSum, d1, result, len);
 
+    if(result != NULL){
+        return true;
+    }
+    else{
+        return false;
+    }
+
 }
 
 void convertToCmnDenom(int& n1, int& d1, int& n2, int& d2){
@@ -39,6 +42,7 @@ void convertToCmnDenom(int& n1, int& d1, int& n2, int& d2){
     d2 = d1;    //together
 }
 
+//this function converts the mixed fraction into a c string
 char* intToCstr(int characteristic, int numerator, int denominator, char* result, int len) {
 	int i = 0;
 	bool isNegative = false;
@@ -85,8 +89,6 @@ char* intToCstr(int characteristic, int numerator, int denominator, char* result
 
 	result[i] = '\0'; // Append string terminator 
 
-	cout << result << endl;
-
 	//now reverse the string
 	result = reverseCstr(result, i);
 
@@ -97,6 +99,7 @@ char* intToCstr(int characteristic, int numerator, int denominator, char* result
 	return result;
 }
 
+//reverses c string
 char* reverseCstr(char* str, int length) {
 	int i = 0;
 	int end = length - 1;
