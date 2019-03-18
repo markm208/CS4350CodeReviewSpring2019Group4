@@ -8,6 +8,7 @@ bool divide(int chara1, int numer1, int denom1,
 
 int main()
 {
+    // testing:
     char result[10];
     if (!divide(5, 0, 1, 2, 0, 1, result, 5))
     {
@@ -109,9 +110,12 @@ int pow10(int shift)
     {
         return 0;
     }
-    while (shift--)
+    while (shift)
     {
+        // count down from shift to 0,
+        // multiplying retval by 10 each time
         retval *= 10;
+        shift--;
     }
     return retval;
 }
@@ -264,8 +268,10 @@ bool divide(int chara1, int numer1, int denom1,
         result[0] = '-';
         loc++;
     }
-    for (int digit = pow10(length(quotient_chara)); digit; digit /= 10)
+    for (int digit = pow10(length(quotient_chara)); digit > 0; digit /= 10)
     {
+        // after the last assignment to result[loc],
+        // digit is set to (int)1/10 = 0
         result[loc] = '0'; // ASCII digit zero, not escape character \0
         while(digit <= quotient_chara)
         {
