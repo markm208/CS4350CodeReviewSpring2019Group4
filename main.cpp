@@ -9,6 +9,15 @@ char* reverseCstr(char* str, int length);
 
 int main()
 {
+    char result[4];
+
+    add(1,1,4,2,5,6,result, 4);
+
+    cout<<"1 1/4 + 2 5/6 = "<<result<<endl;
+
+	add(1,1,2,0,1,2,result, 4);
+	cout<<result<<endl;
+    
     return 0;
 }
 
@@ -50,9 +59,7 @@ char* intToCstr(int characteristic, int numerator, int denominator, char* result
 	if (characteristic == 0 && numerator == 0)	//checks to see if the number is just 0
 	{
 		result[0] = '0';
-		result[1] = '.';
-        result[2] = '0';
-		result[3] = '\0';
+		result[1] = '\0';
 		return result;
 	}
 
