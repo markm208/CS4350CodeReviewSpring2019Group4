@@ -78,8 +78,8 @@ bool subtract(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
         {
             int com_dom = d1 * d2;
             //while the denominators go into the com_dom whithout remaniders cut the com_dom in half
-            new_n1 = n1 * (com_dom / d2);
-            new_n2 = n2 * (com_dom / d1);
+            new_n1 = n1 * d2;
+            new_n2 = n2 * d1;
 
             if(new_n1 > new_n2)
             {
