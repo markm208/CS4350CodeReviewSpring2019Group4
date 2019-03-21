@@ -52,7 +52,7 @@ bool itIsADot(char dot)
 }
 
 //checks for white space
-bool itIsWhiteSpace(char whiteSpace)
+bool itIsSpace(char whiteSpace)
 {
 
 	if (whiteSpace == 32)
@@ -65,7 +65,7 @@ bool itIsWhiteSpace(char whiteSpace)
 //Wrapper function for encapsulating all the other valid character checks
 bool itIsOkVal(char okVal)
 {
-	if (itIsADot(okVal) || itIsANumber(okVal) || itIsPlusOrMinus(okVal) || itIsTheEnd(okVal) || itIsWhiteSpace(okVal))
+	if (itIsADot(okVal) || itIsANumber(okVal) || itIsPlusOrMinus(okVal) || itIsTheEnd(okVal) || itIsSpace(okVal))
 	{
 		return true;
 	}
@@ -102,7 +102,11 @@ int toInt(char anInt)
 	return x;
 }
 
-//Gets the numerator
+//Gets the numerator via taking two positions that are roughly correlated with the upper and lower bounds of the
+//numerator in the string. Then goes through the numString and takes the numerator out of it by going through
+//piecemeal and ensuring proper tens place via using getdenom with proper inputs. Sums each part piecemeal as well
+//then returns the final number. In essence if you have an array with [1234.44] it goes through and takes it out and makes it
+// 123444.
 int getNum(int pos1, int pos2, char numString[])
 {
 	int iterations = pos2 - pos1;
@@ -115,12 +119,29 @@ int getNum(int pos1, int pos2, char numString[])
 
 }
 
+//checks for multiple dots or unary signs
+bool thereAreMultDotsOrUns(char numString[])
+{
+	int unsCount = 0;
+	int dotsCount = 0;
+	foreach(char x : numString)
+	{
+		if (x == '+' || x == '-') unsCount++;
+		if (x == '.') dotsCount++;
+	}
+
+	if (unsCount > 1 || dotsCount > 1) return true;
+
+	return false
+}
 
 
 //new functions go here
-//assuming good input is like a solitary 0.0 to X.X and bad input anything else
+//assuming good input is like a solitary -X.X to X.X and bad input anything else
 bool mantissa(char numString[], int& numerator, int& denominator)
 {
+	//Checks for a bad case
+	if (thereAreMultDotsOrUns(numString)) return false;
 	//Initializes counters and makes preliminary correct size check.
 	numerator = 0;
 	denominator = 0;
