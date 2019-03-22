@@ -65,8 +65,6 @@ bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
 	//check for potential int overflow or underflow
 	//???
 
-	cout << result << endl;
-
 	//do the multiply. the algorithm is (char1 * char2) + (char1 * mant2) + (char2 * mant1) + (mant1 * mant2)
 	//these portions of the product will be called prod1, prod2, prod3, and prod4 respectively
 	int prod1 = c1 * c2;
@@ -98,14 +96,10 @@ bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
 		return false;
 	}
 
-	cout << result << endl;
-
 	for (int index = 0; index < len - 1; index++)
 	{
 		result[index] = '0';
 	}
-
-	cout << result << endl;
 
 	//see if the length of completeChar is longer than len - 1. fail if so
 	int compCharLen = lengthOfInt(completeChar);
@@ -123,8 +117,6 @@ bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
 		startPos++;
 	}
 
-	cout << result << endl;
-
 	//input the characteristic
 	int place = 10;
 	for (int index = compCharLen - 1 + startPos; index >= 0 + startPos; index--, place *= 10)
@@ -132,12 +124,8 @@ bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
 		result[index] = '0' + (completeChar % place) / (place / 10);
 	}
 
-	cout << result << endl;
-
 	//input a decimal
 	result[compCharLen + startPos] = '.';
-
-	cout << result << endl;
 
 	//now we work on the decimal. start with a iterator through the cstr just after the '.'
 	int indexInResult = compCharLen + 1 + startPos;
@@ -177,16 +165,12 @@ bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int
 		//set the current place in the result to nextDigit
 		result[indexInResult] = '0' + nextDigit;
 
-		cout << result << endl;
-
 		//move to the next char in result
 		indexInResult++;
 
 		//update currentDividend
 		currentDividend = currentDividend - (denomProd234 * nextDigit);
 	}
-
-	cout << result << endl;
 
 	return true;
 }
