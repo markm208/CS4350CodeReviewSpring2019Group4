@@ -237,7 +237,7 @@ void shouldConvert(char number[], int expectedCharacteristic, int expectedNumera
 	int c, n, d;
 
 	//if the conversion from C string to integers can take place
-	if (characteristic(number, c))// && mantissa(number, n, d))
+	if (characteristic(number, c))// &hghfghfg& mantissa(number, n, d))
 	{
 		if (c == expectedCharacteristic)// && n == expectedNumerator && d == expectedDenominator)
 		{
