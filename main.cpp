@@ -24,6 +24,179 @@ int main()
     
     return 0;
 }
+//--
+void testCharacteristicAndMantissa()
+{
+	shouldConvert("123.456", 123, 456, 1000);
+	shouldConvert("    123.456", 123, 456, 1000);
+	shouldConvert("123.456    ", 123, 456, 1000);
+	shouldConvert("    123.456    ", 123, 456, 1000);
+
+	shouldConvert("+123.456", 123, 456, 1000);
+	shouldConvert("   +123.456", 123, 456, 1000);
+	shouldConvert("+123.456   ", 123, 456, 1000);
+	shouldConvert("   +123.456   ", 123, 456, 1000);
+
+	shouldConvert("-123.456", -123, 456, 1000);
+	shouldConvert("   -123.456", -123, 456, 1000);
+	shouldConvert("-123.456   ", -123, 456, 1000);
+	shouldConvert("    -123.456   ", -123, 456, 1000);
+
+	shouldConvert("0.456", 0, 456, 1000);
+	shouldConvert("   0.456", 0, 456, 1000); 
+	shouldConvert("0.456   ", 0, 456, 1000);
+	shouldConvert("   0.456   ", 0, 456, 1000);
+
+	shouldConvert("-0.456", 0, -456, 1000);
+	shouldConvert("   -0.456", 0, -456, 1000);
+	shouldConvert("-0.456   ", 0, -456, 1000);
+	shouldConvert("   -0.456   ", 0, -456, 1000);
+
+	shouldConvert(".456", 0, 456, 1000);
+	shouldConvert("    .456", 0, 456, 1000);
+	shouldConvert(".456   ", 0, 456, 1000);
+	shouldConvert("   .456   ", 0, 456, 1000);
+
+	shouldConvert("-.456", 0, -456, 1000);
+	shouldConvert("    -.456", 0, -456, 1000);
+	shouldConvert("-.456   ", 0, -456, 1000);
+	shouldConvert("   -.456   ", 0, -456, 1000);
+
+	shouldConvert("123456", 123456, 0, 10);
+	shouldConvert("   123456", 123456, 0, 10);
+	shouldConvert("123456   ", 123456, 0, 10);
+	shouldConvert("   123456   ", 123456, 0, 10);
+
+	shouldConvert("-123456", -123456, 0, 10);
+	shouldConvert("   -123456", -123456, 0, 10);
+	shouldConvert("-123456   ", -123456, 0, 10);
+	shouldConvert("   -123456   ", -123456, 0, 10);
+
+	shouldConvert("000123.456", 123, 456, 1000);
+	shouldConvert("123.45600000", 123, 456, 1000);
+	shouldConvert("00000123.45600000", 123, 456, 1000);
+
+	shouldConvert("-000123.456", -123, 456, 1000);
+	shouldConvert("-123.45600000", -123, 456, 1000);
+	shouldConvert("-00000123.45600000", -123, 456, 1000);
+
+	shouldConvert("123.00000456", 123, 456, 100000000);
+	shouldConvert("-123.00000456", -123, 456, 100000000);
+}
+//--
+void shouldConvert(char number[], int expectedCharacteristic, int expectedNumerator, int expectedDenominator)
+{
+	int c, n, d;
+
+	//if the conversion from C string to integers can take place
+	if (characteristic(number, c) && mantissa(number, n, d))
+	{
+		if (c == expectedCharacteristic && n == expectedNumerator && d == expectedDenominator)
+		{
+			//test passes, do not print anything on a successful test
+		}
+		else
+		{
+			cout << "Test failed: '" << number << "' "
+				<< "was parsed but did not produce the expected results" << endl;
+
+			if (expectedCharacteristic != c)
+			{
+				cout << "expected characteristic: " << expectedCharacteristic << " "
+					<< "actual characteristic: " << c << endl;
+			}
+
+			if (expectedNumerator != n)
+			{
+				cout << "expected numerator: " << expectedNumerator << " "
+					<< "actual numerator: " << n << endl;
+
+			}
+
+			if (expectedDenominator != d)
+			{
+				cout << "expected denominator: " << expectedDenominator << " "
+					<< "actual denominator: " << d << endl;
+			}
+		}
+	}
+	else
+	{
+		cout << "Test failed: '" << number << "' "
+			<< "was NOT parsed when it should have been." << endl;
+	}
+}
+//--
+void shouldNotConvert(char number[])
+{
+	int c, n, d;
+
+	//if the conversion from C string to integers can take place
+	if (characteristic(number, c) && mantissa(number, n, d))
+	{
+		cout << "Test failed: '" << number << "' "
+			<< "was parsed when it should NOT have been." << endl;
+	}
+}
+//--
+void testMath()
+{
+	//add
+	testAdd();
+	testSubtract();
+	testMultiply();
+	testDivide();
+}
+//--
+void testAdd()
+{
+	const int SHORT_ARRAY_LENGTH = 5;
+	char shortArray[SHORT_ARRAY_LENGTH];
+
+	const int MEDIUM_ARRAY_LENGTH = 10;
+	char mediumArray[MEDIUM_ARRAY_LENGTH];
+
+	const int LARGE_ARRAY_LENGTH = 20;
+	char largeArray[LARGE_ARRAY_LENGTH];
+
+	//should not be enough space in the array for the result
+	if (add(INT_MAX, 0, 10, INT_MAX, 0, 10, shortArray, SHORT_ARRAY_LENGTH))
+	{
+		cout << "Error: not enough space in array" << endl;
+	}
+
+	//0 + 0 = "0"
+	add(0, 0, 10, 0, 0, 10, shortArray, SHORT_ARRAY_LENGTH);
+	shouldConvert(shortArray, 0, 0, 10);
+	add(0, 0, 10, 0, 0, 10, mediumArray, MEDIUM_ARRAY_LENGTH);
+	shouldConvert(mediumArray, 0, 0, 10);
+	add(0, 0, 10, 0, 0, 10, largeArray, LARGE_ARRAY_LENGTH);
+	shouldConvert(largeArray, 0, 0, 10);
+
+	//1 + 1 = "2"
+	add(1, 0, 10, 1, 0, 10, shortArray, SHORT_ARRAY_LENGTH);
+	shouldConvert(shortArray, 2, 0, 10);
+	add(1, 0, 10, 1, 0, 10, mediumArray, MEDIUM_ARRAY_LENGTH);
+	shouldConvert(mediumArray, 2, 0, 10);
+	add(1, 0, 10, 1, 0, 10, largeArray, LARGE_ARRAY_LENGTH);
+	shouldConvert(largeArray, 2, 0, 10);
+
+	//1 + -1.5 = "-.5"
+	add(1, 0, 10, -1, 1, 2, shortArray, SHORT_ARRAY_LENGTH);
+	shouldConvert(shortArray, 0, -5, 10);
+	add(1, 0, 10, -1, 1, 2, mediumArray, MEDIUM_ARRAY_LENGTH);
+	shouldConvert(mediumArray, 0, -5, 10);
+	add(1, 0, 10, -1, 1, 2, largeArray, LARGE_ARRAY_LENGTH);
+	shouldConvert(largeArray, 0, -5, 10);
+
+	//1.125 + 1.6R = "2.79"
+	add(1, 1, 8, 1, 2, 3, shortArray, SHORT_ARRAY_LENGTH);
+	shouldConvert(shortArray, 2, 79, 100);
+
+	//1.125 + 1.6R = "2.7916666"
+	add(1, 1, 8, 1, 2, 3, mediumArray, MEDIUM_ARRAY_LENGTH);
+	shouldConvert(mediumArray, 2, 7916666, 10000000);
+}
 
 //new functions go here
 
