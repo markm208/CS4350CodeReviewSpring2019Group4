@@ -6,53 +6,6 @@ bool divide(int chara1, int numer1, int denom1,
     int chara2, int numer2, int denom2,
     char result[], int len);
 
-int main()
-{
-    // testing:
-    char result[10];
-    if (!divide(5, 0, 1, 2, 0, 1, result, 5))
-    {
-        cout << "Failed to divide" << endl;
-    }
-    else
-    {
-        cout << result << endl;
-    }
-    if (!divide(5, 5, 6, 2, 0, 1, result, 10))
-    {
-        cout << "Failed to divide" << endl;
-    }
-    else
-    {
-        cout << result << endl;
-    }
-    if (!divide(5, 0, 1, 2, 1, 2, result, 5))
-    {
-        cout << "Failed to divide" << endl;
-    }
-    else
-    {
-        cout << result << endl;
-    }
-    if (!divide(-100, 0, 1, 1, 0, 1, result, 5))
-    {
-        cout << "Failed to divide" << endl;
-    }
-    else
-    {
-        cout << result << endl;
-    }
-    if (!divide(-100, 0, 1, 1, 0, 1, result, 4))
-    {
-        cout << "Failed to divide (good)" << endl;
-    }
-    else
-    {
-        cout << "Error: " << result << endl;
-    }
-    return 0;
-}
-
 int compare(int chara1, int numer1, int denom1,
     int chara2, int numer2, int denom2)
 {
@@ -75,18 +28,62 @@ int compare(int chara1, int numer1, int denom1,
     {
         return 1;
     }
-    return 0;
 }
 
+void shouldConvert(char number[], char expected[]);
+void shouldNotConvert(char number[]);
+
+void testMath();
+void testDivide();
+
+int main()
+{
+	//math function tests
+	testMath();
+    
+	return 0;
+}
+//--
+bool shouldConvertInternal(char number[], char expected[])
+{
+    for (int i = 0; ; i++)
+    {
+        if (number[i] != expected[i])
+            return false;
+        if (number[i] == 0 && expected[i] == 0)
+            return true;
+    }
+}
+//--
+void shouldConvert(char number[], char expected[])
+{
+    if (shouldConvertInternal(number, expected))
+        cout << "Good: " << number << " " << expected << endl;
+    else
+        cout << "Bad: " << number << " " << expected << endl;
+}
+void testMath()
+{
+	//divide
+	testDivide();
+}
+//--
 int length(int chara)
 {
     // returns the number of digits required to represent chara in decimal
     int retval = 0;
     int accum = 1;
-
     if (chara == 0)
     {
         return 1;
+    }
+    if (chara >= 1000000000)
+    {
+        return 10;
+    }
+    if (chara <= -1000000000)
+    {
+        return 11;
     }
     if (chara < 0)
     {
@@ -143,8 +140,9 @@ bool divide(int chara1, int numer1, int denom1,
         }
         else
         {
-            chara1 = -chara1-1;
-            numer1 = denom1-numer1;
+//          chara1 = -chara1-1;
+//          numer1 = denom1-numer1;
+            chara1 = -chara1; // (-1, 1, 2) = -1.5, not -1 + .5
         }
         negative = !negative;
     }
@@ -156,10 +154,17 @@ bool divide(int chara1, int numer1, int denom1,
         }
         else
         {
-            chara2 = -chara2-1;
-            numer2 = denom2-numer2;
+//          chara2 = -chara2-1;
+//          numer2 = denom2-numer2;
+            chara2 = -chara2;
         }
         negative = !negative;
+    }
+
+    // check early for results that won't fit
+    if (length(chara1/(chara2+1)) > (negative ? (len-2) : (len-1)))
+    {
+        return false;
     }
 
     // scale in2 until in2<=in1 and 10*in2>in1:
@@ -286,6 +291,11 @@ bool divide(int chara1, int numer1, int denom1,
         }
         
     }
+    if (loc == (negative ? 1 : 0))
+    {
+        result[loc] = '0'; // otherwise 0/1 = "", etc.
+        loc++;
+    }
     if ((len-loc < 2) || (chara1 == 0 && numer1 == 0))
     {
         result[loc] = '\0'; // escape character
@@ -336,4 +346,77 @@ bool divide(int chara1, int numer1, int denom1,
     }
     result[loc] = '\0';
     return true;
+}
+void testDivide()
+{
+	const int SHORT_ARRAY_LENGTH = 5;
+	char shortArray[SHORT_ARRAY_LENGTH];
+
+	const int MEDIUM_ARRAY_LENGTH = 10;
+	char mediumArray[MEDIUM_ARRAY_LENGTH];
+
+	const int LARGE_ARRAY_LENGTH = 20;
+	char largeArray[LARGE_ARRAY_LENGTH];
+
+	//should not be enough space in the array for the result
+	if (divide(INT_MAX, 0, 10, 1, 0, 10, shortArray, SHORT_ARRAY_LENGTH))
+	{
+		cout << "Error: not enough space in array" << endl;
+	}
+
+	//cannot divide by zero
+	if (divide(10, 0, 10, 0, 0, 10, shortArray, SHORT_ARRAY_LENGTH))
+	{
+		cout << "Error: cannot divide by zero" << endl;
+	}
+
+	//0 / 1 = "0"
+	divide(0, 0, 10, 1, 0, 10, shortArray, SHORT_ARRAY_LENGTH);
+	shouldConvert(shortArray, "0");
+	divide(0, 0, 10, 1, 0, 10, mediumArray, MEDIUM_ARRAY_LENGTH);
+	shouldConvert(mediumArray, "0");
+	divide(0, 0, 10, 1, 0, 10, largeArray, LARGE_ARRAY_LENGTH);
+	shouldConvert(largeArray, "0");
+
+	//6 / 3 = "2"
+	divide(6, 0, 10, 3, 0, 10, shortArray, SHORT_ARRAY_LENGTH);
+	shouldConvert(shortArray, "2");
+	divide(6, 0, 10, 3, 0, 10, mediumArray, MEDIUM_ARRAY_LENGTH);
+	shouldConvert(mediumArray, "2");
+	divide(6, 0, 10, 3, 0, 10, largeArray, LARGE_ARRAY_LENGTH);
+	shouldConvert(largeArray, "2");
+
+	//1 / -1.5 = "-.66"
+	divide(1, 0, 10, -1, 1, 2, shortArray, SHORT_ARRAY_LENGTH);
+	shouldConvert(shortArray, "-.66");
+	
+	//1 / -1.5 = "-.6666666"
+	divide(1, 0, 10, -1, 1, 2, mediumArray, MEDIUM_ARRAY_LENGTH);
+	shouldConvert(mediumArray, "-.6666666");
+	
+	//1 / -1.5 = "-.66666666666666666"
+	divide(1, 0, 10, -1, 1, 2, largeArray, LARGE_ARRAY_LENGTH);
+	char expectedResult1[] = "-.66666666666666666";
+	for (int i = 0; i < LARGE_ARRAY_LENGTH; i++)
+	{
+		if (expectedResult1[i] != largeArray[i])
+		{
+			cout << "Error: mismatch in C strings in divide()." << endl
+				<< "Expected: " << expectedResult1 << " "
+				<< "Actual: " << largeArray
+				<< endl;
+		}
+	}
+
+	//1.125 / 1.6R = "0.67"
+	divide(1, 1, 8, 1, 2, 3, shortArray, SHORT_ARRAY_LENGTH);
+	shouldConvert(shortArray, "0.67");
+
+	//1.125 / 1.6R = "0.675"
+	divide(1, 1, 8, 1, 2, 3, mediumArray, MEDIUM_ARRAY_LENGTH);
+	shouldConvert(mediumArray, "0.675");
+
+	//1.125 / 1.6R = "0.675"
+	divide(1, 1, 8, 1, 2, 3, largeArray, LARGE_ARRAY_LENGTH);
+	shouldConvert(largeArray, "0.675");
 }
