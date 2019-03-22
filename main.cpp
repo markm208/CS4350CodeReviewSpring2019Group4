@@ -261,6 +261,20 @@ bool divide(int chara1, int numer1, int denom1,
             numer2 /= 10;
         }
         shift--;
+        // decrease numers, denoms if possible
+        if (!chara1 && !chara2)
+        {
+            while (numer1 && numer2 && !(numer1 % 10) && !(numer2 % 10))
+            {
+                numer1 /= 10;
+                numer2 /= 10;
+            }
+            while (!(denom1 % 10) && !(denom2 % 10))
+            {
+                denom1 /= 10;
+                denom2 /= 10;
+            }
+        }
     }
     // check if quotient can fit in len chars
     if ((negative ? (length(quotient_chara)+1) : length(quotient_chara)) >= len)
@@ -268,11 +282,16 @@ bool divide(int chara1, int numer1, int denom1,
         return false;
     }
     int loc = 0; // current location in string
+    if (quotient_chara == 0 && chara1 == 0 && denom1 == 0) // -0 == 0
+    {
+        negative = false;
+    }
     if (negative)
     {
         result[0] = '-';
         loc++;
     }
+    int quotient_chara_orig = quotient_chara;
     for (int digit = pow10(length(quotient_chara)); digit > 0; digit /= 10)
     {
         // after the last assignment to result[loc],
@@ -291,9 +310,10 @@ bool divide(int chara1, int numer1, int denom1,
         }
         
     }
-    if (loc == (negative ? 1 : 0))
+    if (quotient_chara_orig == 0 && !negative)
     {
-        result[loc] = '0'; // otherwise 0/1 = "", etc.
+        // write "0" - otherwise 0/1 outputs ""
+        result[loc] = '0';
         loc++;
     }
     if ((len-loc < 2) || (chara1 == 0 && numer1 == 0))
@@ -343,6 +363,19 @@ bool divide(int chara1, int numer1, int denom1,
         }
         shift--;
         loc++;
+        if (!chara1 && !chara2)
+        {
+            while (numer1 && numer2 && !(numer1 % 10) && !(numer2 % 10))
+            {
+                numer1 /= 10;
+                numer2 /= 10;
+            }
+            while (!(denom1 % 10) && !(denom2 % 10))
+            {
+                denom1 /= 10;
+                denom2 /= 10;
+            }
+        }
     }
     result[loc] = '\0';
     return true;
