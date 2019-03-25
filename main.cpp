@@ -1,5 +1,5 @@
-#include <iostream> //do not include anything other than this
-
+//Lesya Protasova
+#include <iostream>
 using namespace std;
 
 bool characteristic(char numString[], int &c);
@@ -124,6 +124,177 @@ int main()
 	testMath();
     
     return 0;
+bool isZero(int num)
+{
+	return num == 0;
+}
+
+//returns true if num is negative, false if num is positive or zero
+bool isNegative(int num)
+{
+	return num < 0;
+}
+
+void improperToMixed(int inputNumer, int inputDenom, int& retWhole, int& retNumer)
+{
+	retWhole = inputNumer / inputDenom;
+	retNumer = inputNumer % inputDenom;
+}
+
+int lengthOfInt(int num)
+{
+	int retVal = 0;
+
+	while (true)
+	{
+		retVal++;
+		num = num / 10;
+		if (num == 0)
+		{
+			break;
+		}
+	}
+
+	return retVal;
+}
+
+//the first number is c1 + (n1 / d1), the second number is c2 + (n2 / d2)
+//result is where the product goes, and len is the number of characters (including \0) we can put in result
+bool multiply(int c1, int n1, int d1, int c2, int n2, int d2, char result[], int len)
+{
+	//for testing: print all inputs
+	cout << "multiplying " << c1 << " + (" << n1 << " / " << d1 << ") by ";
+	cout << c2 << " + (" << n2 << " / " << d2 << ") with output length " << len - 1 << endl;
+
+	//check if any denominators are zero. if so, that's undefined, so we have an error (return false)
+	if (isZero(d1) || isZero(d2))
+	{
+		return false;
+	}
+
+	//check if any of the fractions are negative. they should not be, only the characteristics can be negative
+	if (isNegative(n1) || isNegative(d1) || isNegative(n2) || isNegative(d2))
+	{
+		return false;
+	}
+
+	//check if any mantissas are over 1. they should not be
+	if (n1 >= d1 || n2 >= d2)
+	{
+		return false;
+	}
+
+	//check for potential int overflow or underflow
+	//???
+
+	//do the multiply. the algorithm is (char1 * char2) + (char1 * mant2) + (char2 * mant1) + (mant1 * mant2)
+	//these portions of the product will be called prod1, prod2, prod3, and prod4 respectively
+	int prod1 = c1 * c2;
+	int numerOfProd2 = c1 * n2;
+	int denomOfProd2 = d2;
+	int numerOfProd3 = c2 * n1;
+	int denomOfProd3 = d1;
+	int numerOfProd4 = n1 * n2;
+	int denomOfProd4 = d1 * d2;
+
+	//prod1 is a whole number. let's add prod2, 3, and 4 together into one fraction so we can extract any additional whole numbers from it
+	int numerProd234 = (numerOfProd2 * d1) + (numerOfProd3 * d2) + numerOfProd4;
+	int denomProd234 = denomOfProd4;
+
+	//use a helper function to extract a mixed fraction from our improper fraction
+	int wholeProd234;
+	improperToMixed(numerProd234, denomProd234, wholeProd234, numerProd234);
+
+	//add wholeProd234 and prod1 to get the complete characteristic. the rest will be the decimal
+	int completeChar = prod1 + wholeProd234;
+
+	//set up the result string with all 0s and a /0 so we know when we reach the end. make sure our result has enough space for len chars
+	if (sizeof(result) < len)
+	{
+		result[len - 1] = '\0';
+	}
+	else
+	{
+		return false;
+	}
+
+	for (int index = 0; index < len - 1; index++)
+	{
+		result[index] = '0';
+	}
+
+	//see if the length of completeChar is longer than len - 1. fail if so
+	int compCharLen = lengthOfInt(completeChar);
+	if (compCharLen > len - 1)
+	{
+		return false;
+	}
+
+	//if characteristic is negative, input a '-', negate the char, and move the start position over by one
+	int startPos = 0;
+	if (completeChar < 0)
+	{
+		result[0] = '-';
+		completeChar *= -1;
+		startPos++;
+	}
+
+	//input the characteristic
+	int place = 10;
+	for (int index = compCharLen - 1 + startPos; index >= 0 + startPos; index--, place *= 10)
+	{
+		result[index] = '0' + (completeChar % place) / (place / 10);
+	}
+
+	//input a decimal
+	result[compCharLen + startPos] = '.';
+
+	//now we work on the decimal. start with a iterator through the cstr just after the '.'
+	int indexInResult = compCharLen + 1 + startPos;
+
+	/* prep for the long division. currentDividend is whatever we're working on dividing to get
+	the next digit. productsOfDivisor is the multiples of the denom, since whatever the index of
+	the largest one without going over currentDividend is the next digit */
+	int currentDividend = numerProd234;
+	int productsOfDivisor[10] = { 0 };
+	for (int index = 0; index < 10; index++)
+	{
+		productsOfDivisor[index] = index * denomProd234;
+	}
+
+	//while we haven't reached the end of the result cstr
+	while (result[indexInResult] != '\0')
+	{
+		//if there is no multiple of the divisor that fits in the dividend, bring down a 0 (multiply by 10)
+		if (productsOfDivisor[1] > currentDividend)
+		{
+			currentDividend *= 10;
+		}
+
+		//find the index of the greatest multiple that doesn't go over
+		int nextDigit;
+		for (nextDigit = 0; nextDigit < 10; nextDigit++)
+		{
+			//if we go over
+			if (productsOfDivisor[nextDigit] > currentDividend)
+			{
+				//we want one less than what we're currently at
+				nextDigit--;
+				break;
+			}
+		}
+
+		//set the current place in the result to nextDigit
+		result[indexInResult] = '0' + nextDigit;
+
+		//move to the next char in result
+		indexInResult++;
+
+		//update currentDividend
+		currentDividend = currentDividend - (denomProd234 * nextDigit);
+	}
+
+	return true;
 }
 //--
 void testCharacteristicAndMantissa()
@@ -619,6 +790,343 @@ void testAdd()
 	add(1, 1, 8, 1, 2, 3, mediumArray, MEDIUM_ARRAY_LENGTH);
 	shouldConvert(mediumArray, 2, 7916666, 10000000);
 
+
+//Checks to see if the passed in character is a + or - sign 
+bool itIsPlusOrMinus(char plusOrMinus)
+{
+	if (plusOrMinus == 43 || plusOrMinus == 45)
+	{
+		return true;
+	}
+	return false;
+}
+
+//check to see if the passed in character is a number
+bool itIsANumber(char aNum)
+{
+	if (aNum >= 48 && aNum <= 57)
+	{
+		return true;
+	}
+	return false;
+}
+
+//Checks for '/0' character
+bool itIsTheEnd(char end)
+{
+	if (end == 0)
+	{
+		return true;
+	}
+	return false;
+
+}
+
+//checks to see if the passed in character is a '.'
+bool itIsADot(char dot)
+{
+	if (dot == 46)
+	{
+		return true;
+	}
+	return false;
+}
+
+//checks for white space
+bool itIsSpace(char whiteSpace)
+{
+
+	if (whiteSpace == 32)
+	{
+		return true;
+	}
+	return false;
+}
+
+//Wrapper function for encapsulating all the other valid character checks
+bool itIsOkVal(char okVal)
+{
+	if (itIsADot(okVal) || itIsANumber(okVal) || itIsPlusOrMinus(okVal) || itIsTheEnd(okVal) || itIsSpace(okVal))
+	{
+		return true;
+	}
+
+	return false;
+}
+
+
+//Because .size() is off the table this function returns the size in number of elements
+int getLength(char numString[])
+{
+	int i;
+	for (i = 0; !(itIsTheEnd(numString[i])); i++);
+	return i + 1;
+}
+
+//gets the denominator
+int getDenom(int pos1, int pos2)
+{
+	int iterations = pos2 - pos1;
+	int denom = 1;
+	for (int i = 0; i <= iterations; i++)
+	{
+		denom *= 10;
+	}
+	return denom;
+}
+
+//assuming we can't use atoi() so toInt makes chars into their integer equivalent
+int toInt(char anInt)
+{
+	int x = (int)anInt - '0';
+
+	return x;
+}
+
+//Gets the numerator via taking two positions that are roughly correlated with the upper and lower bounds of the
+//numerator in the string. Then goes through the numString and takes the numerator out of it by going through
+//piecemeal and ensuring proper tens place via using getdenom with proper inputs. Sums each part piecemeal as well
+//then returns the final number. In essence if you have an array with [1234.44] it goes through and takes it out and makes it
+// 123444.
+int getNum(int pos1, int pos2, char numString[])
+{
+	int iterations = pos2 - pos1;
+	int num = 0;
+	for (int i = 0; i <= iterations; i++)
+	{
+		num = num + toInt(numString[pos1 + i]) * getDenom(pos1 + i + 1, pos2);
+	}
+	return num;
+
+}
+
+//checks for multiple dots or unary signs
+bool thereAreMultDotsOrUns(char numString[])
+{
+	int unsCount = 0;
+	int dotsCount = 0;
+	foreach(char x : numString)
+	{
+		if (x == '+' || x == '-') unsCount++;
+		if (x == '.') dotsCount++;
+	}
+
+	if (unsCount > 1 || dotsCount > 1) return true;
+
+	return false
+}
+
+
+//new functions go here
+//assuming good input is like a solitary -X.X to X.X and bad input anything else
+bool mantissa(char numString[], int& numerator, int& denominator)
+{
+	//Checks for a bad case
+	if (thereAreMultDotsOrUns(numString)) return false;
+	//Initializes counters and makes preliminary correct size check.
+	numerator = 0;
+	denominator = 0;
+	int numOfElemInAr = getLength(numString);
+	if (numOfElemInAr < 4) return false;
+	int indexOfDot = -33;
+	int indexOfLastGoodVal = -33;
+
+	/*
+	   Does a couple things:
+		1.Checks for good values like numbers, +-, ., , and thus also checks for bad values like anything else Commas are also illegal if that wasn't clear
+		2.Gets index of the X[.]X  symbols first appearance and stores it in indexOfDot
+		3.Gets index of the end of the mantissa so the first whitespace after the last integer following the dot or the \0 character. Whichever comes first
+	*/
+	for (int i = 0; i < numOfElemInAr; i++)
+	{
+		if (itIsOkVal(numString[i]))
+		{
+			if (itIsADot(numString[i]))
+			{
+				indexOfDot = i;
+			}
+			if (itIsTheEnd(numString[i]))
+			{
+				indexOfLastGoodVal = i;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	//Check for index of Dot if no dot in char array then bad input 
+	if (indexOfDot < 0)
+	{
+		return false;
+	}
+	//Check for trailing white spaces that might throw last good value index
+	//iterate backwards as long as they exist until a number is found
+	while (!itIsANumber(numString[indexOfLastGoodVal]))
+	{
+		indexOfLastGoodVal -= 1;
+	}
+	//Gets Scaled denom
+	denominator = getDenom(indexOfDot + 1, indexOfLastGoodVal);
+	//Gets numerator
+	numerator = getNum(indexOfDot + 1, indexOfLastGoodVal, numString);
+
+	//for testing
+	//cout << numerator << "/" << denominator << endl;
+}
+
+
+void testMantissa()
+{
+	int numerator;
+	int denominator;
+	char idealInput[] = "123.456";
+	char has1TrailingWS[] = "123.456 ";
+	char multTrailingWS[] = "123.456  ";
+	char shortIdealInput[] = "123.0";
+	char longIdealInput[] = "123.45600";
+	char leadingWSInput[] = " 123.456";
+	char badInput[] = "123.45A";
+	char badInput2[] = "a23.456";
+	char badInput3[] = "1";
+
+	try
+	{
+		if (mantissa(idealInput, numerator, denominator))
+		{
+			cout << "mantissa works as intended for ideal input" << endl;
+		}
+		else
+		{
+			cout << "Logic Error in ideal input processing" << endl;
+		}
+	}
+	catch (const std::exception&)
+	{
+		cout << "Run Time Error in IdealInput processing" << endl;
+	}
+	try
+	{
+		if (mantissa(has1TrailingWS, numerator, denominator))
+		{
+			cout << "mantissa works as intended for ideal input with 1 trailing ws" << endl;
+		}
+		else
+		{
+			cout << "Logic Error in ideal input processing with 1 ws" << endl;
+		}
+	}
+	catch (const std::exception&)
+	{
+		cout << "Run Time Error in IdealInput processing with 1 ws" << endl;
+	}
+	try
+	{
+		if (mantissa(multTrailingWS, numerator, denominator))
+		{
+			cout << "mantissa works as intended for ideal input with mult trailing ws" << endl;
+		}
+		else
+		{
+			cout << "Logic Error in ideal input processing with mult ws" << endl;
+		}
+	}
+	catch (const std::exception&)
+	{
+		cout << "Run Time Error in IdealInput processing with mult ws" << endl;
+	}
+	try
+	{
+		if (mantissa(shortIdealInput, numerator, denominator))
+		{
+			cout << "mantissa works as intended for short ideal input" << endl;
+		}
+		else
+		{
+			cout << "Logic Error in short ideal input" << endl;
+		}
+	}
+	catch (const std::exception&)
+	{
+		cout << "Run Time Error in short IdealInput processing" << endl;
+	}
+	try
+	{
+		if (mantissa(longIdealInput, numerator, denominator))
+		{
+			cout << "mantissa works as intended for long ideal input" << endl;
+		}
+		else
+		{
+			cout << "Logic Error in long ideal input processing" << endl;
+		}
+	}
+	catch (const std::exception&)
+	{
+		cout << "Run Time Error in long ideal input processing" << endl;
+	}
+	try
+	{
+		if (mantissa(leadingWSInput, numerator, denominator))
+		{
+			cout << "mantissa works as intended for leadingWS input" << endl;
+		}
+		else
+		{
+			cout << "Logic Error in leading ws input" << endl;
+		}
+	}
+	catch (const std::exception&)
+	{
+		cout << "Run Time Error in leading ws input" << endl;
+	}
+	try
+	{
+		if (mantissa(badInput, numerator, denominator))
+		{
+			cout << "Logic error in intentionally bad input1" << endl;
+		}
+		else
+		{
+			cout << "Logic Error in intentionally bad input1" << endl;
+		}
+	}
+	catch (const std::exception&)
+	{
+		cout << "Run Time Error in Intenionally bad input1" << endl;
+	}
+	try
+	{
+		if (mantissa(badInput2, numerator, denominator))
+		{
+			cout << "Logic error in intentionally bad input2" << endl;
+		}
+		else
+		{
+			cout << "Logic Error in intentionally bad input2" << endl;
+		}
+	}
+	catch (const std::exception&)
+	{
+		cout << "Run Time Error in Intenionally bad input2" << endl;
+	}
+	try
+	{
+		if (mantissa(badInput3, numerator, denominator))
+		{
+			cout << "Logic error in intentionally bad input3" << endl;
+		}
+		else
+		{
+			cout << "Logic Error in intentionally bad input3" << endl;
+		}
+	}
+	catch (const std::exception&)
+	{
+		cout << "Run Time Error in Intenionally bad input3" << endl;
+	}
+}
 	//1.125 + 1.6R = "2.79166666666666666"
 	add(1, 1, 8, 1, 2, 3, largeArray, LARGE_ARRAY_LENGTH);
 	//can't use the convert function because the num/denom would overflow
